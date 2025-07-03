@@ -28,12 +28,8 @@ public class WeatherParser {
             return new Weather(
                     jobj.getJsonNumber("latitude").doubleValue(),
                     jobj.getJsonNumber("longitude").doubleValue(),
-                    jobj.getJsonNumber("generationtime_ms").doubleValue(),
-                    jobj.getInt("utc_offset_seconds"),
-
                     jobj.getString("timezone"),
                     jobj.getString("timezone_abbreviation"),
-
                     jobj.getJsonNumber("elevation").doubleValue(),
                     new Hourly(
                             dates,

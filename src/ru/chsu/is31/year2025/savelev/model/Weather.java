@@ -7,21 +7,15 @@ public class Weather {
     private double latitude;
     private double longitude;
     @Deprecated
-    private double generationtime_ms;
-    @Deprecated
-    private int utc_offset_seconds;
-    @Deprecated
     private String timezone;
     @Deprecated
     private String timezone_abbreviation;
     private double elevation;
     private Hourly hourly;
 
-    public Weather(double latitude, double longitude, double generationtime_ms, int utc_offset_seconds, String timezone, String timezone_abbreviation, double elevation, Hourly hourly) {
+    public Weather(double latitude, double longitude, String timezone, String timezone_abbreviation, double elevation, Hourly hourly) {
         this.latitude = latitude;
         this.longitude = longitude;
-        this.generationtime_ms = generationtime_ms;
-        this.utc_offset_seconds = utc_offset_seconds;
         this.timezone = timezone;
         this.timezone_abbreviation = timezone_abbreviation;
         this.elevation = elevation;
@@ -34,14 +28,6 @@ public class Weather {
 
     public double getLongitude() {
         return longitude;
-    }
-
-    public double getGenerationtime_ms() {
-        return generationtime_ms;
-    }
-
-    public int getUtc_offset_seconds() {
-        return utc_offset_seconds;
     }
 
     public String getTimezone() {
@@ -68,8 +54,6 @@ public class Weather {
         JsonObject json = Json.createObjectBuilder()
                 .add("latitude", latitude)
                 .add("longitude", longitude)
-                .add("generationtime_ms", generationtime_ms)
-                .add("utc_offset_seconds", utc_offset_seconds)
                 .add("timezone", timezone)
                 .add("timezone_abbreviation", timezone_abbreviation)
                 .add("elevation", elevation)
