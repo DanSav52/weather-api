@@ -12,7 +12,8 @@ public class Weather {
     private String timezone_abbreviation;
     private double elevation;
     private Hourly hourly;
-
+    private String start_date;
+    private String end_date;
     public Weather(double latitude, double longitude, String timezone, String timezone_abbreviation, double elevation, Hourly hourly) {
         this.latitude = latitude;
         this.longitude = longitude;
@@ -21,7 +22,18 @@ public class Weather {
         this.elevation = elevation;
         this.hourly = hourly;
     }
-
+    public Weather(double latitude, double longitude, String hourly) {
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.hourly = new Hourly(hourly);
+    }
+    public Weather(double latitude, double longitude, String hourly,String start_date, String end_date) {
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.hourly = new Hourly(hourly);
+        this.start_date = start_date;
+        this.end_date = end_date;
+    }
     public double getLatitude() {
         return latitude;
     }
@@ -42,7 +54,15 @@ public class Weather {
         return elevation;
     }
 
-    public Hourly getHourly() {return hourly;}
+    public String getHourly() {return hourly.getName();}
+
+    public String getStart_date() {
+        return start_date;
+    }
+
+    public String getEnd_date() {
+        return end_date;
+    }
 
     @Override
     public String toString() {

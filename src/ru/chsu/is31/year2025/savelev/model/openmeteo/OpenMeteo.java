@@ -1,9 +1,11 @@
 package ru.chsu.is31.year2025.savelev.model.openmeteo;
+import ru.chsu.is31.year2025.savelev.model.Weather;
+import ru.chsu.is31.year2025.savelev.model.WeatherException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.*;
 import java.util.HashMap;
 import java.util.Map;
+
 public class OpenMeteo {
     private final String  protocol;
     private final String server_name;
@@ -18,47 +20,64 @@ public class OpenMeteo {
         this.server_name = server_name;
     }
 
-    public InputStream getForecast(double latitude, double longitude, String hourly) throws MalformedURLException, URISyntaxException {
-        setParams_forecast(String.valueOf(latitude), String.valueOf(longitude), hourly);
-        return get_json(getUrl("/v1/forecast"));
-    };
-
-    public InputStream getArchive(double latitude, double longitude, String hourly, String start_date, String end_date) throws MalformedURLException, URISyntaxException {
-        setParams_archive(String.valueOf(latitude), String.valueOf(longitude), hourly, start_date, end_date);
-        return get_json(getUrl("/v1/archive"));
-    }
-
-    @Deprecated
-    public InputStream get_json(URL url){
+    public Weather getForecast(Weather weather, String error_message) throws MalformedURLException, URISyntaxException, WeatherException {
+        delParams();
+        setParam(LATITUDE, String.valueOf(weather.getLatitude()));
+        setParam(LONGITUDE, String.valueOf(weather.getLongitude()));
+        setParam(HOURLY, weather.getHourly());
+        URL url = getUrl("/v1/forecast");
         try {
             HttpURLConnection connection =  (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("GET");
             connection.connect();
-            if (HttpURLConnection.HTTP_OK == connection.getResponseCode()){
-                return connection.getInputStream();
+            if (connection.getResponseCode() >= 200 && connection.getResponseCode() < 300){
+                return WeatherParser.parse_info(connection.getInputStream(), weather, error_message);
             }
-            else {
-                return null;
+            else{
+                return WeatherParser.parse_info(connection.getErrorStream(), weather, error_message);
             }
         } catch (MalformedURLException e) {
-            throw new RuntimeException(e);
+            error_message = "Переданная строка не является URL: " + url.toString();
+            throw new MalformedURLException(error_message);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            error_message = "Ошибка соединения с сервером: " + e.getMessage();
+            throw new RuntimeException(error_message);
+        }
+    };
+
+    public Weather getArchive(Weather weather, String error_message) throws MalformedURLException, URISyntaxException, WeatherException {
+        delParams();
+        setParam(LATITUDE, String.valueOf(weather.getLatitude()));
+        setParam(LONGITUDE, String.valueOf(weather.getLongitude()));
+        setParam(HOURLY, String.valueOf(weather.getHourly()));
+        setParam(START_DATE, weather.getStart_date());
+        setParam(END_DATE, weather.getEnd_date());
+        URL url = getUrl("/v1/archive");
+        try {
+            HttpURLConnection connection =  (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
+            connection.connect();
+            if (connection.getResponseCode() >= 200 && connection.getResponseCode() < 300){
+                return WeatherParser.parse_info(connection.getInputStream(), weather, error_message);
+            }
+            else{
+                return WeatherParser.parse_info(connection.getErrorStream(), weather, error_message);
+            }
+        } catch (MalformedURLException e) {
+            error_message = "Переданная строка не является URL: " + url.toString();
+            throw new MalformedURLException(error_message);
+        } catch (IOException e) {
+            error_message = "Ошибка соединения с сервером: " + e.getMessage();
+            throw new RuntimeException(error_message);
         }
     }
 
-    public void setParams_forecast(String latitude, String longitude, String hourly) {
-        this.params.put(LATITUDE, latitude);
-        this.params.put(LONGITUDE, longitude);
-        this.params.put(HOURLY, hourly);
+    public void delParams(){
+        this.params.clear();
     }
 
-    public void setParams_archive(String latitude, String longitude, String hourly, String start_date, String end_date) {
-        this.params.put(LATITUDE, latitude);
-        this.params.put(LONGITUDE, longitude);
-        this.params.put(START_DATE, start_date);
-        this.params.put(END_DATE, end_date);
-        this.params.put(HOURLY, hourly);
+    public void setParam(String key, String value) {
+        this.params.put(key, value);
     }
 
     public URL getUrl(String path) throws MalformedURLException, URISyntaxException {

@@ -11,6 +11,9 @@ public class Hourly {
         this.temperature = temperature;
         this.name = hourly;
     }
+    public Hourly(String hourly){
+        this.name = hourly;
+    }
     public List<Date> getTime() {return time;}
     public List<Double> getTemperature() {return temperature;}
     public String getName() {return name;}
