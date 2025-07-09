@@ -55,9 +55,7 @@ public class ConsoleUser {
         int choice;
         Scanner scanner = new Scanner(System.in);
         scanner.useLocale(Locale.US);
-        String error_message = null;
         while (true) {
-            error_message = null;
             System.out.println("Какой прогноз погоды Вас интересует?");
             System.out.println("1 - Прогноз погоды на 16 дней");
             System.out.println("2 - История погоды");
@@ -84,16 +82,16 @@ public class ConsoleUser {
                                             new Weather(
                                                     longitude,
                                                     latitude,
-                                                    hourly),
-                                    error_message);
+                                                    hourly)
+                                    );
                         System.out.println("Результат:");
                         System.out.println(weather.toString());
                     }catch (WeatherException e){
-                        System.out.println("Ошибка получения прогноза: " + e.getMessage());
+                        System.out.println(e.getMessage());
                     }catch (MalformedURLException e) {
-                        System.out.println("Ошибка в URL: " + e.getMessage());
+                        System.out.println(e.getMessage());
                     }catch (URISyntaxException e) {
-                        System.out.println("Ошибка в формате URL: " + e.getMessage());
+                        System.out.println(e.getMessage());
                     }
                     break;
                 case 2:
@@ -114,22 +112,37 @@ public class ConsoleUser {
                                                     longitude,
                                                     hourly,
                                                     startDate,
-                                                    endDate),
-                                    error_message);
+                                                    endDate)
+                                    );
                         System.out.println("Результат:");
                         System.out.println(weather.toString());
 
                     }catch (WeatherException e){
-                        System.out.println("Ошибка получения прогноза: " + e.getMessage());
+                        System.out.println(e.getMessage());
                     }catch (MalformedURLException e) {
-                        System.out.println("Ошибка в URL: " + e.getMessage());
+                        System.out.println(e.getMessage());
                     }catch (URISyntaxException e) {
-                        System.out.println("Ошибка в формате URL: " + e.getMessage());
+                        System.out.println(e.getMessage());
                     }
                     break;
                 default:
                     System.out.println("Неверный выбор. Введите 1 или 2");
             }
+            while (true) {
+                System.out.println("Желаете продолжить работу с приложением?");
+                System.out.println("1 - Да");
+                System.out.println("2 - Нет");
+                try {
+                    choice = scanner.nextInt();
+                    scanner.nextLine();
+                    break;
+                } catch (InputMismatchException e) {
+                    System.out.println("Ошибка: введите число 1 или 2.");
+                    scanner.nextLine();
+                }
+            }
+            if (choice == 2)
+                break;
         }
     }
 }

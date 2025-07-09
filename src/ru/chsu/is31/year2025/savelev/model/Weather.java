@@ -11,29 +11,25 @@ public class Weather {
     @Deprecated
     private String timezone_abbreviation;
     private double elevation;
-    private Hourly hourly;
     private String start_date;
     private String end_date;
-    public Weather(double latitude, double longitude, String timezone, String timezone_abbreviation, double elevation, Hourly hourly) {
-        this.latitude = latitude;
-        this.longitude = longitude;
-        this.timezone = timezone;
-        this.timezone_abbreviation = timezone_abbreviation;
-        this.elevation = elevation;
-        this.hourly = hourly;
-    }
+    private HourlyValues hourlyValues;
+    private String error_message = null;
+
     public Weather(double latitude, double longitude, String hourly) {
         this.latitude = latitude;
         this.longitude = longitude;
-        this.hourly = new Hourly(hourly);
+        this.hourlyValues = new HourlyValues(hourly);
     }
-    public Weather(double latitude, double longitude, String hourly,String start_date, String end_date) {
+
+    public Weather(double latitude, double longitude, String hourly, String start_date, String end_date) {
         this.latitude = latitude;
         this.longitude = longitude;
-        this.hourly = new Hourly(hourly);
+        this.hourlyValues = new HourlyValues(hourly);
         this.start_date = start_date;
         this.end_date = end_date;
     }
+
     public double getLatitude() {
         return latitude;
     }
@@ -54,21 +50,31 @@ public class Weather {
         return elevation;
     }
 
-    public String getHourly() {return hourly.getName();}
+    public String getHourly() {return hourlyValues.getHourly();}
 
-    public String getStart_date() {
-        return start_date;
-    }
+    public HourlyValues getHourlyValues() {return hourlyValues;}
 
-    public String getEnd_date() {
-        return end_date;
+    public void setElevation(double elevation) {this.elevation = elevation;}
+
+    public void setTimezone(String timezone) {this.timezone = timezone;}
+
+    public void setTimezone_abbreviation(String timezone_abbreviation) {this.timezone_abbreviation = timezone_abbreviation;}
+
+    public String getStart_date() {return start_date;}
+
+    public String getEnd_date() {return end_date;}
+
+    public String getError_message() {return error_message;}
+
+    public void setError_message(String error_message) {
+        this.error_message = error_message;
     }
 
     @Override
     public String toString() {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
         JsonArrayBuilder valuesBuilder = Json.createArrayBuilder();
-        for (Date d: hourly.getTime()){
+        for (Date d: hourlyValues.getTime()){
             valuesBuilder.add(dateFormat.format(d));
         }
         JsonObject json = Json.createObjectBuilder()
@@ -79,7 +85,7 @@ public class Weather {
                 .add("elevation", elevation)
                 .add("hourly", Json.createObjectBuilder()
                         .add("time", valuesBuilder)
-                        .add(hourly.getName(), Json.createArrayBuilder(hourly.getTemperature())))
+                        .add(hourlyValues.getHourly(), Json.createArrayBuilder(hourlyValues.getTemperature())))
                 .build();
         return json.toString();
     }

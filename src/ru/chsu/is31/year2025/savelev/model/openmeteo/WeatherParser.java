@@ -1,5 +1,5 @@
 package ru.chsu.is31.year2025.savelev.model.openmeteo;
-import ru.chsu.is31.year2025.savelev.model.Hourly;
+import ru.chsu.is31.year2025.savelev.model.HourlyValues;
 import ru.chsu.is31.year2025.savelev.model.Weather;
 import ru.chsu.is31.year2025.savelev.model.WeatherException;
 
@@ -16,16 +16,14 @@ import java.util.stream.Collectors;
 public class WeatherParser  {
     private static final SimpleDateFormat OPENMETEO_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
 
-    public static Weather parse_info(InputStream iS, Weather weather, String error_message) throws WeatherException{
+    public static Weather parse_info(InputStream iS, Weather weather) throws WeatherException{
         if (iS == null) {
-            error_message = "Пустой поток данных от сервера.";
-            throw new WeatherException(error_message);
+            throw new WeatherException(weather.getError_message() + "Пустой поток данных от сервера.");
         }
         try(JsonReader reader = Json.createReader(iS)) {
             JsonObject jobj = reader.readObject();
             if(jobj.containsKey("error")){
-                error_message = "Ошибка от сервера Open-Meteo: ";
-                throw new WeatherException(error_message + jobj.getString("reason"));
+                throw new WeatherException(weather.getError_message() + jobj.getString("reason"));
             }
 
             Date date = new Date();
@@ -34,36 +32,32 @@ public class WeatherParser  {
                 try {
                     dates.add(OPENMETEO_DATE_FORMAT.parse(((JsonString) element).getString()));
                 } catch (ParseException e) {
-                    error_message = "Ошибка разбора даты.";
-                    throw new WeatherException(error_message, e);
+                    throw new WeatherException(weather.getError_message() + "Ошибка разбора даты.", e);
                 }
             }
 
-            if (jobj.getJsonObject("hourly") == null || !jobj.getJsonObject("hourly").containsKey("time") || !jobj.getJsonObject("hourly").containsKey(weather.getHourly())) {
-                error_message = "Ответ не содержит необходимых данных (hourly): ";
-                throw new WeatherException(error_message + weather.getHourly());
+            if (jobj.getJsonObject("hourly") == null
+                    || !jobj.getJsonObject("hourly").containsKey("time")
+                    || !jobj.getJsonObject("hourly").containsKey(weather.getHourly())) {
+                throw new WeatherException(weather.getError_message() + "Запрос не содержит необходимых данных (hourly): " + weather.getHourly());
             }
 
-            return new Weather(
-                    weather.getLatitude(),
-                    weather.getLongitude(),
-                    jobj.getString("timezone"),
-                    jobj.getString("timezone_abbreviation"),
-                    jobj.getJsonNumber("elevation").doubleValue(),
-                    new Hourly(
-                            dates,
-                            jobj.getJsonObject("hourly").getJsonArray(weather.getHourly()).getValuesAs(JsonNumber.class)
-                                    .stream()
-                                    .map(JsonNumber::doubleValue)
-                                    .collect(Collectors.toList()),
-                            weather.getHourly()
-                    )
+            weather.setElevation(jobj.getJsonNumber("elevation").doubleValue());
+            weather.setTimezone(jobj.getString("timezone"));
+            weather.setTimezone_abbreviation(jobj.getString("timezone_abbreviation"));
+            weather.getHourlyValues().setTemperature(
+                    dates,
+                    jobj.getJsonObject("hourly").getJsonArray(weather.getHourly()).getValuesAs(JsonNumber.class)
+                            .stream()
+                            .map(JsonNumber::doubleValue)
+                            .collect(Collectors.toList())
             );
-        } catch (JsonParsingException e){
-            error_message = "Неправильно введены параметры запроса: " + e.getMessage();
-            throw new WeatherException(error_message);
-        }
 
+            return weather;
+
+        } catch (JsonParsingException e){
+            throw new WeatherException(weather.getError_message() + "Неправильно введены параметры запроса: " + e.getMessage());
+        }
 
     }
 }
