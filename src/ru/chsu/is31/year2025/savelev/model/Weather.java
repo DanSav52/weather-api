@@ -58,6 +58,8 @@ public class Weather {
 
     public void setTimezone(String timezone) {this.timezone = timezone;}
 
+    public void setHourlyValues(HourlyValues hourlyValues) {this.hourlyValues = hourlyValues;}
+
     public void setTimezone_abbreviation(String timezone_abbreviation) {this.timezone_abbreviation = timezone_abbreviation;}
 
     public String getStart_date() {return start_date;}
@@ -68,6 +70,10 @@ public class Weather {
 
     public void setError_message(String error_message) {
         this.error_message = error_message;
+    }
+
+    public boolean isErrorEmpty(){
+        return this.error_message == null;
     }
 
     @Override

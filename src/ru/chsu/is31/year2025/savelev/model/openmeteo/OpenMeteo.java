@@ -1,8 +1,8 @@
 package ru.chsu.is31.year2025.savelev.model.openmeteo;
 import ru.chsu.is31.year2025.savelev.model.Weather;
-import ru.chsu.is31.year2025.savelev.model.WeatherException;
 import java.io.IOException;
 import java.net.*;
+import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -20,7 +20,7 @@ public class OpenMeteo {
         this.server_name = server_name;
     }
 
-    public Weather getForecast(Weather weather) throws MalformedURLException, URISyntaxException, WeatherException {
+    public Weather getForecast(Weather weather) throws MalformedURLException, URISyntaxException, ParseException {
         delParams();
         setParam(LATITUDE, String.valueOf(weather.getLatitude()));
         setParam(LONGITUDE, String.valueOf(weather.getLongitude()));
@@ -31,20 +31,22 @@ public class OpenMeteo {
             connection.setRequestMethod("GET");
             connection.connect();
             if (connection.getResponseCode() >= 200 && connection.getResponseCode() < 300){
-                return WeatherParser.parse_info(connection.getInputStream(), weather);
+                weather.setHourlyValues(WeatherParser.parse_info_pro(connection.getInputStream(), weather));
             }
             else{
-                weather.setError_message("Ошибка от сервера Open-Meteo: ");
-                return WeatherParser.parse_info(connection.getErrorStream(), weather);
+                weather.setError_message("Ошибка от сервера Open-Meteo: " + WeatherParser.parse_error(connection.getErrorStream(), weather));
             }
+            return weather;
         } catch (MalformedURLException e) {
             throw new MalformedURLException("Переданная строка не является URL: " + url.toString());
         } catch (IOException e) {
             throw new RuntimeException("Ошибка соединения с сервером: " + e.getMessage());
+        } catch (ParseException e) {
+            throw new ParseException( e.getMessage(), 0);
         }
     };
 
-    public Weather getArchive(Weather weather) throws MalformedURLException, URISyntaxException, WeatherException {
+    public Weather getArchive(Weather weather) throws MalformedURLException, URISyntaxException, ParseException {
         delParams();
         setParam(LATITUDE, String.valueOf(weather.getLatitude()));
         setParam(LONGITUDE, String.valueOf(weather.getLongitude()));
@@ -57,16 +59,18 @@ public class OpenMeteo {
             connection.setRequestMethod("GET");
             connection.connect();
             if (connection.getResponseCode() >= 200 && connection.getResponseCode() < 300){
-                return WeatherParser.parse_info(connection.getInputStream(), weather);
+                weather.setHourlyValues(WeatherParser.parse_info_pro(connection.getInputStream(), weather));
             }
             else{
-                weather.setError_message("Ошибка от сервера Open-Meteo: ");
-                return WeatherParser.parse_info(connection.getErrorStream(), weather);
+                weather.setError_message("Ошибка от сервера Open-Meteo: " + WeatherParser.parse_error(connection.getErrorStream(), weather));
             }
+            return weather;
         } catch (MalformedURLException e) {
             throw new MalformedURLException("Переданная строка не является URL: " + url.toString());
         } catch (IOException e) {
             throw new RuntimeException("Ошибка соединения с сервером: " + e.getMessage());
+        } catch (ParseException e) {
+            throw new ParseException(e.getMessage(), 0);
         }
     }
 

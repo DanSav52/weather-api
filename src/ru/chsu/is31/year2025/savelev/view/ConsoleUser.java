@@ -1,12 +1,11 @@
 package ru.chsu.is31.year2025.savelev.view;
-
 import ru.chsu.is31.year2025.savelev.controller.Validator;
 import ru.chsu.is31.year2025.savelev.model.Weather;
-import ru.chsu.is31.year2025.savelev.model.WeatherException;
 import ru.chsu.is31.year2025.savelev.model.openmeteo.OpenMeteo;
-import ru.chsu.is31.year2025.savelev.model.openmeteo.WeatherParser;
+
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
+import java.text.ParseException;
 import java.util.InputMismatchException;
 import java.util.Locale;
 import java.util.Scanner;
@@ -84,13 +83,18 @@ public class ConsoleUser {
                                                     latitude,
                                                     hourly)
                                     );
-                        System.out.println("Результат:");
-                        System.out.println(weather.toString());
-                    }catch (WeatherException e){
-                        System.out.println(e.getMessage());
+                        if (weather.isErrorEmpty()){
+                            System.out.println("Результат:");
+                            System.out.println(weather.toString());
+                        }
+                        else{
+                            System.out.println(weather.getError_message());
+                        }
                     }catch (MalformedURLException e) {
                         System.out.println(e.getMessage());
                     }catch (URISyntaxException e) {
+                        System.out.println(e.getMessage());
+                    }catch (ParseException e) {
                         System.out.println(e.getMessage());
                     }
                     break;
@@ -114,14 +118,18 @@ public class ConsoleUser {
                                                     startDate,
                                                     endDate)
                                     );
-                        System.out.println("Результат:");
-                        System.out.println(weather.toString());
-
-                    }catch (WeatherException e){
-                        System.out.println(e.getMessage());
+                        if (weather.isErrorEmpty()){
+                            System.out.println("Результат:");
+                            System.out.println(weather.toString());
+                        }
+                        else{
+                            System.out.println(weather.getError_message());
+                        }
                     }catch (MalformedURLException e) {
                         System.out.println(e.getMessage());
                     }catch (URISyntaxException e) {
+                        System.out.println(e.getMessage());
+                    } catch (ParseException e) {
                         System.out.println(e.getMessage());
                     }
                     break;
